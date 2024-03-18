@@ -1,0 +1,12 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+
+stages:
+  - hello
+
+hello:
+  stage: hello
+  script: |
+    echo Hello World
