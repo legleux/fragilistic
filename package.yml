@@ -10,3 +10,5 @@ hello:
   stage: hello
   script: |
     echo Hello World
+    echo "RIPPLED_BRANCH: $RIPPLED_BRANCH"
+    echo "RIPPLED_GIT: $RIPPLED_GIT"
