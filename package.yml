@@ -16,7 +16,7 @@ variables:
   PUBLIC_REPO_ROOT: "https://repos.ripple.com/repos"
 
 stages:
-  - dpkg_build
+  - build_packages
 
 dpkg_build:
   timeout: "1h 30m"
@@ -24,11 +24,10 @@ dpkg_build:
   image:
     name: artifactory.ops.ripple.com/${DPKG_CONTAINER_NAME}:${DPKG_CONTAINER_TAG}
   tags:
-    - 4xlarge
+    - docker-4xlarge
   artifacts:
     paths:
       - build/dpkg/packages/
   script:
-    # if not develop
     - git clone --depth=1 --branch $RIPPLED_BRANCH https://github.com/legleux/rippled.git
     - . ./gitlab-ci/build_package.sh dpkg

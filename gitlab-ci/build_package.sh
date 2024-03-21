@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -ex
+set -x
 pkgtype=$1
 if [ "${pkgtype}" = "rpm" ] ; then
     container_name="${RPM_CONTAINER_FULLNAME}"
