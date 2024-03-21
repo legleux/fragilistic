@@ -2,13 +2,33 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
     - if: $CI_PIPELINE_SOURCE == "pipeline"
+variables:
+  # these containers are built manually and tagged/pushed so they can be used here
+  RPM_CONTAINER_TAG: "2023-02-13"
+  RPM_CONTAINER_NAME: "rippled-rpm-builder"
+  RPM_CONTAINER_FULLNAME: "${RPM_CONTAINER_NAME}:${RPM_CONTAINER_TAG}"
+  DPKG_CONTAINER_TAG: "2023-07-31"
+  DPKG_CONTAINER_NAME: "rippleci/rippled-dpkg-builder"
+  DPKG_CONTAINER_FULLNAME: "${DPKG_CONTAINER_NAME}:${DPKG_CONTAINER_TAG}"
+  ARTIFACTORY_HOST: "artifactory.ops.ripple.com"
+  ARTIFACTORY_HUB: "${ARTIFACTORY_HOST}:6555"
+  GIT_SIGN_PUBKEYS_URL: "https://gitlab.ops.ripple.com/xrpledger/rippled-packages/snippets/49/raw"
+  PUBLIC_REPO_ROOT: "https://repos.ripple.com/repos"
 
 stages:
-  - hello
+  - dpkg_build
 
-hello:
-  stage: hello
-  script: |
-    echo Hello World
-    echo "RIPPLED_BRANCH: $RIPPLED_BRANCH"
-    echo "RIPPLED_GIT: $RIPPLED_GIT"
+dpkg_build:
+  timeout: "1h 30m"
+  stage: build_packages
+  image:
+    name: artifactory.ops.ripple.com/${DPKG_CONTAINER_NAME}:${DPKG_CONTAINER_TAG}
+  tags:
+    - 4xlarge
+  artifacts:
+    paths:
+      - build/dpkg/packages/
+  script:
+    # if not develop
+    - git clone --depth=1 --branch $RIPPLED_BRANCH https://github.com/legleux/rippled.git
+    - . ./gitlab-ci/build_package.sh dpkg

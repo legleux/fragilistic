@@ -11,11 +11,11 @@ else
     echo "invalid package type"
     exit 1
 fi
-time docker pull "${ARTIFACTORY_HUB}/${container_name}"
-docker tag \
-  "${ARTIFACTORY_HUB}/${container_name}" \
-  "${container_name}"
-docker images
+# time docker pull "${ARTIFACTORY_HUB}/${container_name}"
+# docker tag \
+#   "${ARTIFACTORY_HUB}/${container_name}" \
+#   "${container_name}"
+# docker images
 
 test -d build && rm -rf build
 mkdir -p build/${pkgtype}
@@ -23,7 +23,11 @@ mkdir -p build/${pkgtype}
 container_label=${container_tag}
 
 docker run \
-    -v ${PWD}:/opt/rippled_bld/pkg/rippled \
+    --rm -it \
+    -e RIPPLED_GIT=$RIPPLED_GIT \
+    -v /opt/rippled_bld/pkg/rippled/Builds/containers/rippled \
+    -v ${PWD}/:/opt/rippled_bld/pkg/rippled/Builds/containers \
+    -v ${PWD}/rippled/:/opt/rippled_bld/pkg/rippled/ \
     -v ${PWD}/build/${pkgtype}:/opt/rippled_bld/pkg/out \
-    -t rippled-${pkgtype}-builder:${container_label} \
-    /bin/bash -c "cp -fpu fragilistic/packaging/${pkgtype}/build_${pkgtype}.sh . && ./build_${pkgtype}.sh"
+    -t rippleci/rippled-${pkgtype}-builder:${container_label} \
+    bash -c "cp -fpu rippled/Builds/containers/packaging/${pkgtype}/build_${pkgtype}.sh . && ./build_${pkgtype}.sh"
