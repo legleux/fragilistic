@@ -23,11 +23,10 @@ mkdir -p build/${pkgtype}
 container_label=${container_tag}
 
 docker run \
-    --rm -it \
     -e RIPPLED_GIT=$RIPPLED_GIT \
     -v /opt/rippled_bld/pkg/rippled/Builds/containers/rippled \
     -v ${PWD}/:/opt/rippled_bld/pkg/rippled/Builds/containers \
     -v ${PWD}/rippled/:/opt/rippled_bld/pkg/rippled/ \
     -v ${PWD}/build/${pkgtype}:/opt/rippled_bld/pkg/out \
     -t rippleci/rippled-${pkgtype}-builder:${container_label} \
-    bash -c "cp -fpu rippled/Builds/containers/packaging/${pkgtype}/build_${pkgtype}.sh . && ./build_${pkgtype}.sh"
+    bash -c "find . -name build_${pkgtype}.sh"

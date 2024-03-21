@@ -34,33 +34,8 @@ override_dh_auto_configure:
 			-DCMAKE_VERBOSE_MAKEFILE=ON \
 			-DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake
 
-	mkdir build.rippled-reporting
-
-	cd build.rippled-reporting && \
-		/root/.pyenv/shims/conan install .. \
-			--profile gcc \
-			--output-folder . \
-			--settings compiler.cppstd=17 \
-			--settings build_type=Release \
-			--build missing \
-			--build boost \
-			--build sqlite3 \
-			--build libuv \
-			--options reporting=True
-
-	cd build.rippled-reporting && \
-		cmake .. \
-			-DCMAKE_BUILD_TYPE=Release \
-			-Dvalidator_keys=ON \
-			-Dstatic=ON \
-			-Dunity=OFF \
-			-Dreporting=ON \
-			-DCMAKE_VERBOSE_MAKEFILE=ON \
-			-DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake
-
 override_dh_auto_build:
 	cmake --build build.rippled --target rippled --target validator-keys --parallel 8
-	cmake --build build.rippled-reporting --target rippled --parallel 8
 
 override_dh_auto_install:
 	cmake --install build.rippled --prefix debian/tmp/opt/ripple
@@ -70,12 +45,3 @@ override_dh_auto_install:
 	install -D Builds/containers/shared/update-rippled-cron debian/tmp/opt/ripple/etc/update-rippled-cron
 	install -D Builds/containers/shared/rippled-logrotate debian/tmp/etc/logrotate.d/rippled
 	rm -rf debian/tmp/opt/ripple/lib64/cmake/date
-
-	mkdir -p debian/tmp/opt/rippled-reporting/etc
-	mkdir -p debian/tmp/opt/rippled-reporting/bin
-	cp cfg/validators-example.txt debian/tmp/opt/rippled-reporting/etc/validators.txt
-
-	sed -E 's/rippled?/rippled-reporting/g' Builds/containers/shared/update-rippled.sh > debian/tmp/opt/rippled-reporting/bin/update-rippled-reporting.sh
-	sed -E 's/rippled?/rippled-reporting/g' bin/getRippledInfo > debian/tmp/opt/rippled-reporting/bin/getRippledReportingInfo
-	sed -E 's/rippled?/rippled-reporting/g' Builds/containers/shared/update-rippled-cron > debian/tmp/opt/rippled-reporting/etc/update-rippled-reporting-cron
-	sed -E 's/rippled?/rippled-reporting/g' Builds/containers/shared/rippled-logrotate > debian/tmp/etc/logrotate.d/rippled-reporting

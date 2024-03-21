@@ -14,6 +14,23 @@ variables:
   ARTIFACTORY_HUB: "${ARTIFACTORY_HOST}:6555"
   GIT_SIGN_PUBKEYS_URL: "https://gitlab.ops.ripple.com/xrpledger/rippled-packages/snippets/49/raw"
   PUBLIC_REPO_ROOT: "https://repos.ripple.com/repos"
+  RIPPLED_BRANCH: "develop"
+
+.dind_template: &dind_param
+  before_script:
+    - . ./Builds/containers/gitlab-ci/docker_alpine_setup.sh
+  variables:
+    docker_driver: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  image:
+    name: artifactory.ops.ripple.com/docker:latest
+  services:
+    # workaround for TLS issues - consider going back
+    # back to unversioned `dind` when issues are resolved
+    - name: artifactory.ops.ripple.com/docker:stable-dind
+      alias: docker
+  tags:
+    - 4xlarge
 
 stages:
   - build_packages
@@ -21,13 +38,14 @@ stages:
 dpkg_build:
   timeout: "1h 30m"
   stage: build_packages
-  image:
-    name: artifactory.ops.ripple.com/${DPKG_CONTAINER_NAME}:${DPKG_CONTAINER_TAG}
+  image: rippleci/rippled-dpkg-builder:2023-07-31
   tags:
-    - docker-4xlarge
+    - 4xlarge
   artifacts:
     paths:
       - build/dpkg/packages/
   script:
+    - echo "RIPPLED_BRANCH $RIPPLED_BRANCH"
+    - export PKG_OUTDIR=pkgs
     - git clone --depth=1 --branch $RIPPLED_BRANCH https://github.com/legleux/rippled.git
-    - . ./gitlab-ci/build_package.sh dpkg
+    - cp packaging/dpkg/build_dpkg.sh . && ./build_dpkg.sh

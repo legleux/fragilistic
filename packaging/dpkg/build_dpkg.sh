@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
-set -ex
+set -x
 
 # make sure pkg source files are up to date with repo
-cd /opt/rippled_bld/pkg
-cp -fpru rippled/Builds/containers/packaging/dpkg/debian/. debian/
-cp -fpu rippled/Builds/containers/shared/rippled*.service debian/
-cp -fpu rippled/Builds/containers/shared/update_sources.sh .
+# cd /opt/rippled_bld/pkg
+cp -fpru packaging/dpkg/debian/. debian/
+cp -fpu shared/rippled*.service debian/
+cp -fpu shared/update_sources.sh .
 source update_sources.sh
 
 # Build the dpkg
 
 #dpkg uses - as separator, so we need to change our -bN versions to tilde
 RIPPLED_DPKG_VERSION=$(echo "${RIPPLED_VERSION}" | sed 's!-!~!g')
-# TODO - decide how to handle the trailing/release
-# version here (hardcoded to 1). Does it ever need to change?
 RIPPLED_DPKG_FULL_VERSION="${RIPPLED_DPKG_VERSION}-1"
-git config --global --add safe.directory /opt/rippled_bld/pkg/rippled
-cd /opt/rippled_bld/pkg/rippled
+git config --global --add safe.directory rippled
+cd rippled
 if [[ -n $(git status --porcelain) ]]; then
     git status
     error "Unstaged changes in this repo - please commit first"
