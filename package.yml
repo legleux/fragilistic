@@ -43,9 +43,9 @@ dpkg_build:
     - 4xlarge
   artifacts:
     paths:
-      - build/dpkg/packages/
+      - build/packages/
   script:
     - echo "RIPPLED_BRANCH $RIPPLED_BRANCH"
-    - export PKG_OUTDIR=pkgs
+    - export PKG_OUTDIR=build/packages/
     - git clone --depth=1 --branch $RIPPLED_BRANCH https://github.com/legleux/rippled.git
     - cp packaging/dpkg/build_dpkg.sh . && ./build_dpkg.sh
